@@ -19,7 +19,9 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20
 splits = text_splitter.split_documents(documents)
 
 # Generate embeddings and persist to chroma db
-embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+embeddings = OpenAIEmbeddings(
+    openai_api_key=OPENAI_API_KEY, model="text-embedding-3-small"
+)
 vectorstore = Chroma.from_documents(
     documents=splits, embedding=embeddings, persist_directory=CHROMA_PATH
 )

@@ -27,7 +27,9 @@ app.add_middleware(
 redis_client = redis.from_url(REDIS_URL)
 
 # Setup vector DB
-embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+embeddings = OpenAIEmbeddings(
+    openai_api_key=OPENAI_API_KEY, model="text-embedding-3-small"
+)
 vectorstore = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
 
 # Setup LLM
@@ -79,6 +81,9 @@ async def process_text(input: TextInput):
         print(f"ERROR: Chroma path {CHROMA_PATH} does not exist.")
     else:
         print(f"Chroma path {CHROMA_PATH} exists.")
+
+    collection = vectorstore.get()
+    print("Number of documents loaded from vector store:", len(collection["documents"]))
 
     retriever = vectorstore.as_retriever()
     docs = retriever.get_relevant_documents(input.text)
