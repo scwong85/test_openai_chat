@@ -81,6 +81,9 @@ async def process_text(input: TextInput):
         print(f"ERROR: Chroma path {CHROMA_PATH} does not exist.")
     else:
         print(f"Chroma path {CHROMA_PATH} exists.")
+        print(os.listdir(CHROMA_PATH))
+        for files in os.listdir(CHROMA_PATH):
+            print(files)
 
     collection = vectorstore.get()
     print("Number of documents loaded from vector store:", len(collection["documents"]))
