@@ -37,6 +37,8 @@ async def get_response(prompt: str):
         messages=[{"role": "user", "content": prompt}]
     )
 
+    reply = completion.choices[0].message.content
+
     return {
         "input": prompt,
         "reply": reply,
