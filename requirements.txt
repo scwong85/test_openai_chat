@@ -3,3 +3,8 @@ uvicorn
 openai
 python-multipart
 dotenv
+langchain-openai
+langchain-community
+langchain
+redis
+chromadb
