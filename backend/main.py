@@ -31,7 +31,7 @@ embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 vectorstore = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
 
 # Setup LLM
-llm = ChatOpenAI(model="gpt-4o", temperature=0, openai_api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, openai_api_key=OPENAI_API_KEY)
 
 # Custom RAG chain
 prompt_template = """
