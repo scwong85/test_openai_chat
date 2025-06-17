@@ -74,7 +74,11 @@ async def rate_limiter(request: Request, call_next):
 
 @app.post("/process_text/")
 async def process_text(input: TextInput):
-    response = qa_chain.invoke({"query": input.text})
+
+    if not os.path.exists(CHROMA_PATH):
+        print(f"ERROR: Chroma path {CHROMA_PATH} does not exist.")
+    else:
+        print(f"Chroma path {CHROMA_PATH} exists.")
 
     retriever = vectorstore.as_retriever()
     docs = retriever.get_relevant_documents(input.text)
@@ -85,6 +89,12 @@ async def process_text(input: TextInput):
     if not docs:
         return {"reply": "Sorry, I don't have any relevant information to answer that."}
 
+    if not os.path.exists(CHROMA_PATH):
+        print(f"ERROR: Chroma path {CHROMA_PATH} does not exist.")
+    else:
+        print(f"Chroma path {CHROMA_PATH} exists.")
+
+    response = qa_chain.invoke({"query": input.text})
     return {"input": input.text, "reply": response["result"]}
 
 
