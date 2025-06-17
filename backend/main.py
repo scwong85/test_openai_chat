@@ -14,7 +14,7 @@ load_dotenv()
 
 # Environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-REDIS_URL = os.getenv("REDIS_URL_LOCAL")
+REDIS_URL = os.getenv("REDIS_URL")
 CHROMA_PATH = "./chroma_db"
 
 # Initialize services
