@@ -75,6 +75,16 @@ async def rate_limiter(request: Request, call_next):
 @app.post("/process_text/")
 async def process_text(input: TextInput):
     response = qa_chain.invoke({"query": input.text})
+
+    retriever = vectorstore.as_retriever()
+    docs = retriever.get_relevant_documents(input.text)
+    print(f"Retrieved {len(docs)} documents")
+    for doc in docs:
+        print(doc.page_content[:200])
+
+    if not docs:
+        return {"reply": "Sorry, I don't have any relevant information to answer that."}
+
     return {"input": input.text, "reply": response["result"]}
 
 
