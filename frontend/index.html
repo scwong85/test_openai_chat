@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Speech/Text Assistant</title>
+  <script src="app.js" defer></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col items-center min-h-screen p-4">
+
+  <div class="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 mt-6 space-y-6">
+    <h1 class="text-2xl font-bold text-center text-indigo-700">🎙️ AI Speech/Text Assistant</h1>
+
+    <!-- Input Section -->
+    <div class="flex flex-col sm:flex-row gap-3">
+      <input id="text-input" type="text" placeholder="Type your question..." 
+             class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none text-base" />
+      <button id="send-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-lg transition w-full sm:w-auto">
+        Send
+      </button>
+    </div>
+
+    <!-- Response Status -->
+    <div id="status" class="text-center text-gray-700 text-base break-words max-w-full">
+      Waiting for input...
+    </div>
+    <div id="history-container" class="mt-4 p-2 border-t border-gray-400 text-sm max-h-64 overflow-y-auto">
+      <h2 class="font-bold text-lg mb-2">🗂️ History</h2>
+      <button id="clear-history-btn" class="text-red-500 text-sm hover:underline">🗑️ Clear Chat</button>
+      <ul id="history-list" class="space-y-3"></ul>
+      <button id="replay-btn" class="bg-purple-500 text-white px-3 py-1 mt-2 rounded hidden">🔁 Replay</button>
+    </div>
+    
+  </div>
+
+  <footer class="mt-auto py-4 text-sm text-gray-500 text-center">
+  </footer>
+</body>
+</html>
