@@ -1,19 +1,19 @@
 # backend/main.py
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
-import pinecone
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
-from langchain.chains import RetrievalQA, RetrievalQAWithSourcesChain
+from langchain.chains import RetrievalQA
 from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from pinecone import Pinecone, ServerlessSpec
+from pinecone import Pinecone
 import redis
+import uvicorn
 
 load_dotenv()
 
@@ -29,6 +29,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
 )
+
+redis_client = redis.from_url(REDIS_URL)
 
 # Initialize Pinecone and LangChain components
 embeddings = OpenAIEmbeddings(
