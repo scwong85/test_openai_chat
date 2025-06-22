@@ -15,8 +15,7 @@ loader = DirectoryLoader("./documents", glob="**/*.txt", loader_cls=TextLoader)
 documents = loader.load()
 
 # Split documents into chunks for embeddings
-text_splitter = RecursiveCharacterTextSplitter(
-  chunk_size=1000, chunk_overlap=200)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 splits = text_splitter.split_documents(documents)
 
 # Generate embeddings and persist to chroma db

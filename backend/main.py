@@ -8,7 +8,7 @@ import os
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
-from langchain.chains import RetrievalQA
+from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from pinecone import Pinecone
@@ -19,6 +19,7 @@ load_dotenv()
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = "openai-rag-index"
+PINECONE_INDEX_NAME = "study-buddhism-index"
 REDIS_URL = os.getenv("REDIS_URL")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -42,29 +43,36 @@ pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 index = pc.Index(PINECONE_INDEX_NAME)
 
 text_field = "text"
-vectorstore = PineconeVectorStore(index, embeddings, text_field)
+vectorstore = PineconeVectorStore(index, embeddings, text_key=text_field)
 
 
 # Custom system prompt to make sure model only answers from context
-PROMPT = PromptTemplate(
-    template="""You are a helpful assistant. Use ONLY the following context to answer questions.
-If you do not know the answer, say "I do not have information on that.".
----
-{context}
----
-Question: {question}
-""",
-    input_variables=["context", "question"],
+
+prompt_template = """Use the following pieces of context to answer the question at the end.  Try to answer in a structured way. Write your answer in HTML format but do not include ```html ```. Put words in bold that directly answer your question.
+If you don't know the answer, just say 'I am sorry I dont know the answer to this question or you dont have access to the files needed to answer the question.' Don't try to make up an answer.
+
+{summaries}
+
+
+Question: {question}.
+"""
+
+PROMPT_WITH_SOURCE = PromptTemplate(
+    template=prompt_template, input_variables=["summaries", "question"]
 )
+
 
 llm = ChatOpenAI(
     openai_api_key=OPENAI_API_KEY, model_name="gpt-3.5-turbo", temperature=0
 )
-qa_chain = RetrievalQA.from_chain_type(
+
+
+qa_chain_source = RetrievalQAWithSourcesChain.from_chain_type(
     llm=llm,
     chain_type="stuff",
     retriever=vectorstore.as_retriever(),
-    chain_type_kwargs={"prompt": PROMPT},
+    chain_type_kwargs={"prompt": PROMPT_WITH_SOURCE},
+    return_source_documents=True,
 )
 
 
@@ -85,12 +93,22 @@ async def rate_limiter(request: Request, call_next):
 
 @app.post("/process_text/")
 async def process_text(input: TextInput):
-    response = qa_chain.invoke({"query": input.text})
+
+    response = qa_chain_source.invoke({"question": input.text})
+    # Extract sources as list of strings
+    sources = []
+    if "I dont know the answer" not in response["answer"]:
+        source_docs = response["source_documents"]
+        sources = [
+            doc.metadata.get("source", "")
+            for doc in source_docs
+            if doc.metadata.get("source")
+        ]
     return {
         "input": input.text,
-        "reply": response["result"],
+        "reply": response["answer"],
+        "sources": list(set(sources)),  # List of URLs
     }
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=8000, reload=True)
