@@ -1,5 +1,5 @@
 const backendUrl = "https://test-openai-chat.onrender.com"; // Replace with your actual backend
-// const backendUrl = "http:localhost:8000"; // Replace with your actual backend
+//const backendUrl = "http:localhost:8000"; // Replace with your actual backend
 
 const sendBtn = document.getElementById("send-btn");
 const textInput = document.getElementById("text-input");
@@ -33,13 +33,14 @@ async function processText(text) {
     const entry = {
       user: text,
       reply: data.reply,
+      sources: data.sources ? data.sources : [],
       timestamp,
     };
 
     history.push(entry);
     saveHistory();
     renderHistory();
-    status.textContent = "🧠 GPT: " + data.reply;
+    status.textContent = "🧠 StudyBuddhismBot: " + data.reply;
   } catch (err) {
     console.error("Error processing:", err);
     status.textContent = "❌ Failed to process input.";
@@ -52,12 +53,15 @@ function renderHistory() {
   history.forEach((entry, index) => {
     const li = document.createElement("li");
     li.className = "bg-gray-100 rounded p-2";
+    const sourcesList = entry.sources.map(src => `<li><a href="${src}" target="_blank" class="text-blue-500 underline">${src}</a></li>`).join('');
 
     li.innerHTML = `
       <div><strong>You:</strong> ${entry.user}</div>
-      <div><strong>GPT:</strong> ${entry.reply}</div>
+      <div><strong>StudyBuddhismAssistant:</strong> ${entry.reply}</div>
+      <div><strong>Sources:</strong><ul class="ml-4 list-disc">${sourcesList}</ul></div>
       <div class="text-xs text-gray-500">🕒 ${entry.timestamp}</div>
     `;
+
 
     historyList.appendChild(li);
   });
