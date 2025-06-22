@@ -6,8 +6,15 @@
   <title>AI Speech/Text Assistant</title>
   <script src="app.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Disable entire page scroll */
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center min-h-screen p-4">
+<body class="bg-gray-100 flex flex-col items-center h-screen p-4">
 
   <div class="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 mt-6 space-y-6">
     <h1 class="text-2xl font-bold text-center text-indigo-700">🎙️ AI Speech/Text Assistant</h1>
@@ -25,6 +32,8 @@
     <div id="status" class="text-center text-gray-700 text-base break-words max-w-full">
       Waiting for input...
     </div>
+
+    <!-- History Section -->
     <div id="history-container" class="mt-4 p-2 border-t border-gray-400 text-sm max-h-64 overflow-y-auto">
       <h2 class="font-bold text-lg mb-2">🗂️ History</h2>
       <button id="clear-history-btn" class="text-red-500 text-sm hover:underline">🗑️ Clear Chat</button>
@@ -36,5 +45,21 @@
 
   <footer class="mt-auto py-4 text-sm text-gray-500 text-center">
   </footer>
+
+  <!-- JS to handle ENTER key -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('text-input');
+      const sendButton = document.getElementById('send-btn');
+
+      // Trigger send when ENTER is pressed
+      input.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault(); // Prevent default form submission if any
+          sendButton.click();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
