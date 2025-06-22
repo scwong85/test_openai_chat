@@ -1,110 +1,78 @@
-from fastapi import FastAPI, Request, HTTPException
+# backend/main.py
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
-import redis
-import os
 from dotenv import load_dotenv
-import uvicorn
+import os
+import pinecone
+from langchain_openai import OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore
+
+from langchain.chains import RetrievalQA, RetrievalQAWithSourcesChain
+from langchain_community.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
+from pinecone import Pinecone, ServerlessSpec
 
 load_dotenv()
 
-# Environment variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-REDIS_URL = os.getenv("REDIS_URL")
-CHROMA_PATH = "./chroma_db"
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_INDEX_NAME = "openai-rag-index"
 
-# Initialize services
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
 app = FastAPI()
 
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
 )
 
-redis_client = redis.from_url(REDIS_URL)
+# Initialize Pinecone and LangChain components
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model="text-embedding-3-small")
 
-# Setup vector DB
-embeddings = OpenAIEmbeddings(
-    openai_api_key=OPENAI_API_KEY, model="text-embedding-3-small"
+pc = Pinecone(
+    api_key=os.environ.get("PINECONE_API_KEY")
 )
-vectorstore = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
 
-# Setup LLM
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, openai_api_key=OPENAI_API_KEY)
+index = pc.Index(PINECONE_INDEX_NAME)
 
-# Custom RAG chain
-prompt_template = """
-You are a helpful assistant. Use ONLY the following context to answer.
-If the answer cannot be found, say "I don't know."
+text_field = "text"
+vectorstore = PineconeVectorStore(  
+    index, embeddings, text_field  
+)  
 
-Context:
-{context}
 
-Question:
-{question}
-"""
-
+# Custom system prompt to make sure model only answers from context
 PROMPT = PromptTemplate(
-    template=prompt_template, input_variables=["context", "question"]
+    template="""You are a helpful assistant. Use ONLY the following context to answer questions.
+If you do not know the answer, say "I do not have information on that.".
+---
+{context}
+---
+Question: {question}
+""",
+    input_variables=["context", "question"]
 )
 
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model_name="gpt-3.5-turbo", temperature=0)
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
     retriever=vectorstore.as_retriever(),
-    chain_type_kwargs={"prompt": PROMPT},
+    chain_type_kwargs={"prompt": PROMPT}
 )
-
 
 class TextInput(BaseModel):
     text: str
 
-
-@app.middleware("http")
-async def rate_limiter(request: Request, call_next):
-    ip = request.client.host
-    count = redis_client.incr(ip)
-    if count == 1:
-        redis_client.expire(ip, 60)
-    if count > 10:
-        raise HTTPException(status_code=429, detail="Too many requests")
-    return await call_next(request)
-
-
 @app.post("/process_text/")
 async def process_text(input: TextInput):
-
-    if not os.path.exists(CHROMA_PATH):
-        print(f"ERROR: Chroma path {CHROMA_PATH} does not exist.")
-    else:
-        print(f"Chroma path {CHROMA_PATH} exists.")
-        print(os.listdir(CHROMA_PATH))
-        for files in os.listdir(CHROMA_PATH):
-            print(files)
-
-    collection = vectorstore.get()
-    print("Number of documents loaded from vector store:", len(collection["documents"]))
-
-    retriever = vectorstore.as_retriever()
-    docs = retriever.get_relevant_documents(input.text)
-    print(f"Retrieved {len(docs)} documents")
-    for doc in docs:
-        print(doc.page_content[:200])
-
-    if not docs:
-        return {"reply": "Sorry, I don't have any relevant information to answer that."}
-
-    if not os.path.exists(CHROMA_PATH):
-        print(f"ERROR: Chroma path {CHROMA_PATH} does not exist.")
-    else:
-        print(f"Chroma path {CHROMA_PATH} exists.")
-
     response = qa_chain.invoke({"query": input.text})
-    return {"input": input.text, "reply": response["result"]}
-
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", port=8000, reload=True)
+    return {
+        "input": input.text,
+        "reply": response["result"],
+    }
