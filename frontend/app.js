@@ -53,12 +53,18 @@ function renderHistory() {
   history.forEach((entry, index) => {
     const li = document.createElement("li");
     li.className = "bg-gray-100 rounded p-2";
-    const sourcesList = entry.sources.map(src => `<li><a href="${src}" target="_blank" class="text-blue-500 underline">${src}</a></li>`).join('');
 
+    let sourcesHTML = '';
+    if (entry.sources && entry.sources.length > 0) {
+        const sourcesList = entry.sources.map(src => 
+            `<li><a href="${src}" target="_blank" class="text-blue-500 underline">${src}</a></li>`
+        ).join('');
+        sourcesHTML = `<div><strong>Sources:</strong><ul class="ml-4 list-disc">${sourcesList}</ul></div>`;
+    }
     li.innerHTML = `
       <div><strong>You:</strong> ${entry.user}</div>
       <div><strong>StudyBuddhismAssistant:</strong> ${entry.reply}</div>
-      <div><strong>Sources:</strong><ul class="ml-4 list-disc">${sourcesList}</ul></div>
+      ${sourcesHTML}
       <div class="text-xs text-gray-500">🕒 ${entry.timestamp}</div>
     `;
 
