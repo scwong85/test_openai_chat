@@ -19,6 +19,14 @@
   <div class="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 mt-6 space-y-6">
     <h1 class="text-2xl font-bold text-center text-indigo-700">🎙️ StudyBuddhism Assistant</h1>
 
+    <!-- History Section -->
+    <div id="history-container" class="mt-4 p-2 border-t border-gray-400 text-sm max-h-64 overflow-y-auto">
+      <h2 class="font-bold text-lg mb-2">🗂️ History</h2>
+      <button id="clear-history-btn" class="text-red-500 text-sm hover:underline">🗑️ Clear Chat</button>
+      <ul id="history-list" class="space-y-3"></ul>
+      <button id="replay-btn" class="bg-purple-500 text-white px-3 py-1 mt-2 rounded hidden">🔁 Replay</button>
+    </div>
+
     <!-- Input Section -->
     <div class="flex flex-col sm:flex-row gap-3">
       <input id="text-input" type="text" placeholder="Type your question..." 
@@ -31,14 +39,6 @@
     <!-- Response Status -->
     <div id="status" class="text-center text-gray-700 text-base break-words max-w-full">
       Waiting for input...
-    </div>
-
-    <!-- History Section -->
-    <div id="history-container" class="mt-4 p-2 border-t border-gray-400 text-sm max-h-64 overflow-y-auto">
-      <h2 class="font-bold text-lg mb-2">🗂️ History</h2>
-      <button id="clear-history-btn" class="text-red-500 text-sm hover:underline">🗑️ Clear Chat</button>
-      <ul id="history-list" class="space-y-3"></ul>
-      <button id="replay-btn" class="bg-purple-500 text-white px-3 py-1 mt-2 rounded hidden">🔁 Replay</button>
     </div>
     
   </div>

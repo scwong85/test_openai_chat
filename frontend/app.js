@@ -70,6 +70,7 @@ function renderHistory() {
 
 
     historyList.appendChild(li);
+    scrollHistoryToBottom();
   });
 
 
@@ -86,6 +87,13 @@ function loadHistory() {
     history = JSON.parse(data);
     renderHistory();
   }
+}
+
+function scrollHistoryToBottom() {
+    const historyContainer = document.getElementById('history-container');
+    setTimeout(() => {
+        historyContainer.scrollTop = historyContainer.scrollHeight;
+    }, 0);
 }
 
 clearHistoryBtn.addEventListener("click", () => {
