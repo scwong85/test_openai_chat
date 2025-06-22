@@ -1,5 +1,5 @@
-// const backendUrl = "https://test-openai-chat.onrender.com"; // Replace with your actual backend
-const backendUrl = "http:localhost:8000"; // Replace with your actual backend
+const backendUrl = "https://test-openai-chat.onrender.com"; // Replace with your actual backend
+// const backendUrl = "http:localhost:8000"; // Replace with your actual backend
 
 const sendBtn = document.getElementById("send-btn");
 const textInput = document.getElementById("text-input");

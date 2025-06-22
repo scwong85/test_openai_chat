@@ -13,7 +13,8 @@ load_dotenv()
 PINECONE_API_KEY = os.environ["PINECONE_API_KEY"]
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PINECONE_INDEX_NAME = "openai-rag-index"
-MODEL="text-embedding-3-small"
+MODEL = "text-embedding-3-small"
+
 
 def process_txt_file(file_path):
     # create a loader
@@ -40,10 +41,7 @@ def main():
             dimension=1536,
             metric="euclidean",
             # parameters for the free tier index
-            spec=ServerlessSpec(
-                cloud="aws",
-                region="us-east-1"
-            )
+            spec=ServerlessSpec(cloud="aws", region="us-east-1"),
         )
 
     file_path = "../documents"  # Replace with your actual file path, there should be .txt files in that folder for ingestion
@@ -52,16 +50,14 @@ def main():
         openai_api_key=OPENAI_API_KEY, model="text-embedding-3-small"
     )
 
-    PineconeVectorStore(index_name=PINECONE_INDEX_NAME,embedding=embeddings)
+    PineconeVectorStore(index_name=PINECONE_INDEX_NAME, embedding=embeddings)
 
     vectorstore_from_docs = PineconeVectorStore.from_documents(
-        text_chunks,
-        index_name=PINECONE_INDEX_NAME,
-        embedding=embeddings
+        text_chunks, index_name=PINECONE_INDEX_NAME, embedding=embeddings
     )
     index = pc.Index(name=PINECONE_INDEX_NAME)
     print(index.describe_index_stats())
 
 
 if __name__ == "__main__":
-  main()
+    main()
